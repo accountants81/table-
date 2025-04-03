@@ -1,0 +1,1596 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المنتظم اليومي المتكامل</title>
+    <style>
+        :root {
+            --primary: #2e7d32;
+            --secondary: #1b5e20;
+            --accent: #ffab00;
+            --text: #263238;
+            --border: #e0e0e0;
+            --bg-color: #f5f5f5;
+            --prayer-bg: #e8f5e9;
+            --section-bg: #ffffff;
+            --done-color: #4caf50;
+            --not-done-color: #f44336;
+            --pending-color: #ff9800;
+            --add-color: #2196F3;
+            --delete-color: #f44336;
+            --edit-color: #FFC107;
+            --print-color: #9C27B0;
+            --text-done: #2e7d32;
+            --text-not-done: #f44336;
+            --text-pending: #ff9800;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Tajawal', sans-serif;
+        }
+        
+        body {
+            background-color: var(--bg-color);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 25px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+        
+        .header p {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+        
+        .planner-tabs {
+            display: flex;
+            background: linear-gradient(to right, #f5f5f5, #e0e0e0);
+            border-bottom: 1px solid var(--border);
+            position: relative;
+        }
+        
+        .tab {
+            padding: 15px 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            position: relative;
+            font-size: 16px;
+            color: #555;
+        }
+        
+        .tab:hover {
+            background: rgba(255,255,255,0.8);
+        }
+        
+        .tab.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            right: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--primary);
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 25px;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .planner-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+        
+        @media (max-width: 768px) {
+            .planner-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .section {
+            background: var(--section-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+            position: relative;
+            border: 1px solid rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .section:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        
+        .section-title {
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-size: 22px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .section-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .section-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            color: white;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .section-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+        }
+        
+        .section-btn.add {
+            background-color: var(--add-color);
+        }
+        
+        .section-btn.delete {
+            background-color: var(--delete-color);
+        }
+        
+        .section-btn.print {
+            background-color: var(--print-color);
+        }
+        
+        /* أنماط التحكم الموحدة */
+        .control-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .control-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .control-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        .done-btn {
+            background-color: var(--done-color);
+        }
+        
+        .not-done-btn {
+            background-color: var(--not-done-color);
+        }
+        
+        .pending-btn {
+            background-color: var(--pending-color);
+        }
+        
+        .edit-btn {
+            background-color: var(--edit-color);
+        }
+        
+        /* أنماط الصلوات المحسنة */
+        .prayer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .prayer-item {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.3s;
+            border-top: 4px solid var(--primary);
+            position: relative;
+        }
+        
+        .prayer-item.done {
+            border-top-color: var(--done-color);
+            background-color: #E8F5E9;
+        }
+        
+        .prayer-item.not-done {
+            border-top-color: var(--not-done-color);
+            background-color: #FFEBEE;
+        }
+        
+        .prayer-item.pending {
+            border-top-color: var(--pending-color);
+            background-color: #FFF8E1;
+        }
+        
+        .prayer-name {
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 5px;
+            color: var(--primary);
+        }
+        
+        .prayer-time {
+            background: #f5f5f5;
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .prayer-time:hover {
+            background: #e0e0e0;
+        }
+        
+        /* أنماط الجداول */
+        .time-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .time-table tr:nth-child(even) {
+            background-color: var(--bg-color);
+        }
+        
+        .time-table td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+            transition: all 0.3s;
+        }
+        
+        .time-table tr:hover td {
+            background: rgba(0,0,0,0.03);
+        }
+        
+        .time-table td:first-child {
+            font-weight: bold;
+            width: 25%;
+            color: var(--secondary);
+        }
+        
+        .time-input {
+            border: none;
+            background: transparent;
+            width: 100%;
+            font-family: 'Tajawal';
+            font-size: 16px;
+            padding: 5px;
+        }
+        
+        .time-input:focus {
+            outline: none;
+            background: white;
+            border-radius: 4px;
+            box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.2);
+        }
+        
+        /* أنماط قوائم المهام */
+        .daily-checklist {
+            list-style: none;
+        }
+        
+        .daily-checklist li {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+        
+        .daily-checklist li:hover {
+            background: rgba(0,0,0,0.03);
+        }
+        
+        .daily-checklist li.done {
+            color: var(--text-done);
+            text-decoration: line-through;
+        }
+        
+        .daily-checklist li.not-done {
+            color: var(--text-not-done);
+        }
+        
+        .daily-checklist li.pending {
+            color: var(--text-pending);
+        }
+        
+        .daily-checklist span {
+            flex-grow: 1;
+            padding: 0 10px;
+        }
+        
+        /* أنماط الطباعة */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .tab-content.active,
+            .tab-content.active * {
+                visibility: visible;
+            }
+            .tab-content.active {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                padding: 20px;
+            }
+            .section-actions, 
+            .print-floating-btn,
+            .planner-tabs,
+            .header,
+            .footer,
+            .section-manager {
+                display: none !important;
+            }
+            .prayer-item {
+                break-inside: avoid;
+            }
+        }
+        
+        /* زر الطباعة العائم */
+        .print-floating-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--print-color);
+            color: white;
+            border: none;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            cursor: pointer;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            transition: all 0.3s;
+        }
+        
+        .print-floating-btn:hover {
+            transform: scale(1.1);
+            background: #7B1FA2;
+        }
+        
+        /* قائمة إدارة الأقسام */
+        .section-manager {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            z-index: 100;
+        }
+        
+        .manager-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            cursor: pointer;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        
+        .manager-btn:hover {
+            transform: scale(1.1) rotate(90deg);
+            background: var(--secondary);
+        }
+        
+        .manager-menu {
+            position: absolute;
+            bottom: 70px;
+            left: 0;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            padding: 10px;
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            min-width: 220px;
+        }
+        
+        .manager-menu.show {
+            display: flex;
+            animation: fadeInUp 0.3s ease;
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .menu-item {
+            padding: 10px 15px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .menu-item:hover {
+            background: #f5f5f5;
+        }
+        
+        .menu-item i {
+            width: 25px;
+            height: 25px;
+            background: #e8f5e9;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+        }
+        
+        /* تحسينات الأداء */
+        .will-change {
+            will-change: transform, opacity;
+        }
+        
+        /* التاريخ القابل للتعديل */
+        .editable-date {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 10px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .editable-date:hover {
+            background: #f0f0f0;
+        }
+        
+        .date-display {
+            padding: 15px 25px;
+            background: #f9f9f9;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            font-size: 16px;
+        }
+        
+        /* رسائل التأكيد */
+        .confirmation-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s;
+        }
+        
+        .confirmation-modal.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+        
+        .modal-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .modal-btn {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        
+        .modal-btn.confirm {
+            background: var(--done-color);
+            color: white;
+        }
+        
+        .modal-btn.cancel {
+            background: var(--not-done-color);
+            color: white;
+        }
+        
+        /* التقييم */
+        .footer {
+            padding: 20px;
+            text-align: center;
+            background: #f9f9f9;
+            border-top: 1px solid var(--border);
+        }
+        
+        .rating {
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+        
+        .star {
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #ddd;
+        }
+        
+        .star:hover, .star.active {
+            color: #FFC107;
+            text-shadow: 0 0 5px #FFC107;
+        }
+        
+        /* تأثيرات الحركة */
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(10px); }
+        }
+        
+        /* أقسام الملاحظات */
+        .notes-section textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-family: 'Tajawal';
+            font-size: 16px;
+            resize: vertical;
+        }
+        
+        /* حالة المهام */
+        .status-select {
+            padding: 5px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            font-family: 'Tajawal';
+        }
+        
+        .status-select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- مكتبة html2canvas لتحويل HTML إلى صورة -->
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>بسم الله الرحمن الرحيم</h1>
+            <p>المنتظم اليومي المتكامل</p>
+        </div>
+        
+        <div class="planner-tabs">
+            <div class="tab active" onclick="openTab('daily-tab')">الجدول اليومي</div>
+            <div class="tab" onclick="openTab('full-schedule-tab')">جدول الـ24 ساعة</div>
+            <div class="tab" onclick="openTab('prayers-tab')">الصلوات والأذكار</div>
+            <div class="tab" onclick="openTab('tasks-tab')">المهام والدوريات</div>
+        </div>
+        
+        <div class="date-display">
+            <span>اليوم: <span id="current-day" class="editable-date" onclick="editDay()">________</span></span>
+            <span>التاريخ: <span id="current-date" class="editable-date" onclick="editDate()">________</span></span>
+        </div>
+        
+        <!-- تبويب الجدول اليومي -->
+        <div id="daily-tab" class="tab-content active">
+            <div class="planner-content">
+                <div class="section" id="daily-schedule">
+                    <h2 class="section-title">
+                        جدول الساعات اليومي
+                        <div class="section-actions">
+                            <button class="section-btn print" onclick="printAsImage('daily-schedule')">
+                                <i class="fas fa-print"></i>
+                            </button>
+                            <button class="section-btn add" onclick="addCustomTimeRow('daily-table')">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <button class="section-btn delete" onclick="showConfirmation('هل تريد حذف هذا القسم؟', () => removeSection('daily-schedule'))">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </h2>
+                    <table class="time-table" id="daily-table">
+                        <!-- سيتم إضافة الصفوف ديناميكياً -->
+                    </table>
+                </div>
+                
+                <div class="section" id="daily-tasks">
+                    <h2 class="section-title">
+                        تخطيط اليوم
+                        <div class="section-actions">
+                            <button class="section-btn print" onclick="printAsImage('daily-tasks')">
+                                <i class="fas fa-print"></i>
+                            </button>
+                            <button class="section-btn add" onclick="addTask('daily-tasks-list')">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <button class="section-btn delete" onclick="showConfirmation('هل تريد حذف هذا القسم؟', () => removeSection('daily-tasks'))">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </h2>
+                    <ul class="daily-checklist" id="daily-tasks-list">
+                        <!-- سيتم إضافة المهام ديناميكياً -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- تبويب جدول 24 ساعة -->
+        <div id="full-schedule-tab" class="tab-content">
+            <div class="section" id="full-schedule">
+                <h2 class="section-title">
+                    جدول الـ24 ساعة
+                    <div class="section-actions">
+                        <button class="section-btn print" onclick="printAsImage('full-schedule')">
+                            <i class="fas fa-print"></i>
+                        </button>
+                        <button class="section-btn add" onclick="addCustomTimeRow('full-schedule-table')">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        <button class="section-btn delete" onclick="showConfirmation('هل تريد حذف هذا القسم؟', () => removeSection('full-schedule'))">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </h2>
+                <table class="time-table" id="full-schedule-table">
+                    <!-- سيتم إضافة الصفوف ديناميكياً -->
+                </table>
+            </div>
+        </div>
+        
+        <!-- تبويب الصلوات والأذكار -->
+        <div id="prayers-tab" class="tab-content">
+            <div class="planner-content">
+                <div class="section" id="prayers-section">
+                    <h2 class="section-title">
+                        <i class="fas fa-pray"></i> الصلوات الخمس وقيام الليل
+                        <div class="section-actions">
+                            <button class="section-btn print" onclick="printAsImage('prayers-section')">
+                                <i class="fas fa-print"></i>
+                            </button>
+                            <button class="section-btn add" onclick="addCustomPrayer()">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <button class="section-btn delete" onclick="showConfirmation('هل تريد حذف هذا القسم؟', () => removeSection('prayers-section'))">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </h2>
+                    <div class="prayer-grid" id="prayers-container">
+                        <!-- سيتم إضافة الصلوات ديناميكياً -->
+                    </div>
+                </div>
+                
+                <div class="section" id="adhkar-section">
+                    <h2 class="section-title">
+                        <i class="fas fa-dhikr"></i> الأذكار اليومية
+                        <div class="section-actions">
+                            <button class="section-btn print" onclick="printAsImage('adhkar-section')">
+                                <i class="fas fa-print"></i>
+                            </button>
+                            <button class="section-btn add" onclick="addDhikrItem()">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <button class="section-btn delete" onclick="showConfirmation('هل تريد حذف هذا القسم؟', () => removeSection('adhkar-section'))">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </h2>
+                    <ul class="daily-checklist" id="adhkar-list">
+                        <!-- سيتم إضافة الأذكار ديناميكياً -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- تبويب المهام والدوريات -->
+        <div id="tasks-tab" class="tab-content">
+            <div class="planner-content">
+                <div class="section" id="periodic-tasks">
+                    <h2 class="section-title">
+                        <i class="fas fa-tasks"></i> المهام الدورية
+                        <div class="section-actions">
+                            <button class="section-btn print" onclick="printAsImage('periodic-tasks')">
+                                <i class="fas fa-print"></i>
+                            </button>
+                            <button class="section-btn add" onclick="addTask('periodic-tasks-list')">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <button class="section-btn delete" onclick="showConfirmation('هل تريد حذف هذا القسم؟', () => removeSection('periodic-tasks'))">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </h2>
+                    <ul class="daily-checklist" id="periodic-tasks-list">
+                        <!-- سيتم إضافة المهام ديناميكياً -->
+                    </ul>
+                </div>
+                
+                <div class="section" id="improvements-section">
+                    <h2 class="section-title">
+                        <i class="fas fa-chart-line"></i> نقاط التحسين
+                        <div class="section-actions">
+                            <button class="section-btn print" onclick="printAsImage('improvements-section')">
+                                <i class="fas fa-print"></i>
+                            </button>
+                            <button class="section-btn add" onclick="addImprovement()">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <button class="section-btn delete" onclick="showConfirmation('هل تريد حذف هذا القسم؟', () => removeSection('improvements-section'))">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </h2>
+                    <ul class="daily-checklist" id="improvements-list">
+                        <!-- سيتم إضافة نقاط التحسين ديناميكياً -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <div class="rating">
+                <span class="star" onclick="rateDay(1)">★</span>
+                <span class="star" onclick="rateDay(2)">★</span>
+                <span class="star" onclick="rateDay(3)">★</span>
+                <span class="star" onclick="rateDay(4)">★</span>
+                <span class="star" onclick="rateDay(5)">★</span>
+            </div>
+            <p>أسأل الله أن يتقبل منا ومنكم صالح الأعمال</p>
+        </div>
+    </div>
+    
+    <!-- أزرار التحكم العائمة -->
+    <button class="print-floating-btn" onclick="printActiveTabAsImage()">
+        <i class="fas fa-print"></i>
+    </button>
+    
+    <div class="section-manager">
+        <button class="manager-btn" onclick="toggleManagerMenu()">
+            <i class="fas fa-plus"></i>
+        </button>
+        <div class="manager-menu" id="manager-menu">
+            <div class="menu-item" onclick="addCustomSection('daily')">
+                <i class="fas fa-calendar-day"></i>
+                <span>إضافة قسم يومي جديد</span>
+            </div>
+            <div class="menu-item" onclick="addCustomSection('prayers')">
+                <i class="fas fa-pray"></i>
+                <span>إضافة قسم صلوات</span>
+            </div>
+            <div class="menu-item" onclick="addCustomSection('tasks')">
+                <i class="fas fa-tasks"></i>
+                <span>إضافة قسم مهام</span>
+            </div>
+            <div class="menu-item" onclick="addCustomSection('notes')">
+                <i class="fas fa-sticky-note"></i>
+                <span>إضافة قسم ملاحظات</span>
+            </div>
+            <div class="menu-item" onclick="addCustomSection('custom')">
+                <i class="fas fa-edit"></i>
+                <span>إضافة قسم مخصص</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- نافذة التأكيد -->
+    <div class="confirmation-modal" id="confirmation-modal">
+        <div class="modal-content">
+            <h3 id="confirmation-message">هل أنت متأكد من هذا الإجراء؟</h3>
+            <div class="modal-actions">
+                <button class="modal-btn confirm" onclick="confirmAction()">نعم</button>
+                <button class="modal-btn cancel" onclick="hideConfirmation()">إلغاء</button>
+            </div>
+        </div>
+    </div>
+<script>
+        // بيانات التطبيق
+        const appData = {
+            sections: {},
+            currentTab: 'daily-tab',
+            dayRating: 0,
+            prayers: [
+                { id: 'fajr', name: 'الفجر', time: '4:13', status: 'pending' },
+                { id: 'dhuhr', name: 'الظهر', time: '12:00', status: 'pending' },
+                { id: 'asr', name: 'العصر', time: '3:32', status: 'pending' },
+                { id: 'maghrib', name: 'المغرب', time: '6:16', status: 'pending' },
+                { id: 'isha', name: 'العشاء', time: '7:35', status: 'pending' },
+                { id: 'tahajjud', name: 'قيام الليل', time: '02:00', status: 'pending' }
+            ],
+            confirmationCallback: null,
+            defaultTasks: [
+                'الهدف الرئيسي لليوم',
+                'أفضل ساعات الإنتاجية',
+                'المهام العاجلة',
+                'المهام المهمة غير العاجلة',
+                'تقييم نهاية اليوم'
+            ],
+            defaultAdhkar: [
+                'أذكار الصباح',
+                'أذكار المساء',
+                'سورة الملك قبل النوم',
+                'الورد اليومي من القرآن',
+                'دعاء اليوم',
+                'الاستغفار (100 مرة)'
+            ],
+            defaultPeriodicTasks: [
+                'تلاوة القرآن الكريم',
+                'مراجعة الحفظ',
+                'الصلاة على الوقت',
+                'صلاة التراويح',
+                'إفطار صائم (دعوة مستجابة)',
+                'ذكر الله المستمر',
+                'الاستغفار (100 مرة)',
+                'الصدقة اليومية'
+            ],
+            defaultImprovements: [
+                'ما الذي يمكنني تحسينه غداً؟',
+                'أخطاء اليوم وتجنبها غداً'
+            ]
+        };
+
+        // تهيئة التطبيق
+        function initApp() {
+            updateDate();
+            loadData();
+            createDefaultContent();
+            setupEventListeners();
+        }
+        
+        function updateDate() {
+            const now = new Date();
+            const days = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+            
+            if (!localStorage.getItem('currentDay')) {
+                document.getElementById('current-day').textContent = days[now.getDay()];
+            }
+            
+            if (!localStorage.getItem('currentDate')) {
+                document.getElementById('current-date').textContent = now.toLocaleDateString('ar-EG');
+            }
+        }
+        
+        function loadData() {
+            const savedData = localStorage.getItem('dailyPlannerData');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                appData.sections = data.sections || {};
+                appData.dayRating = data.dayRating || 0;
+                appData.prayers = data.prayers || appData.prayers;
+                
+                // تحميل التاريخ المحفوظ
+                if (localStorage.getItem('currentDay')) {
+                    document.getElementById('current-day').textContent = localStorage.getItem('currentDay');
+                }
+                
+                if (localStorage.getItem('currentDate')) {
+                    document.getElementById('current-date').textContent = localStorage.getItem('currentDate');
+                }
+                
+                highlightStars(appData.dayRating);
+            }
+        }
+        
+        function saveData() {
+            const dataToSave = {
+                sections: appData.sections,
+                dayRating: appData.dayRating,
+                prayers: appData.prayers
+            };
+            localStorage.setItem('dailyPlannerData', JSON.stringify(dataToSave));
+        }
+        
+        function createDefaultContent() {
+            // الصلوات
+            if (!document.getElementById('prayers-container').children.length) {
+                renderPrayers();
+            }
+            
+            // الجداول الزمنية
+            if (!document.getElementById('daily-table').rows.length) {
+                for (let i = 6; i <= 23; i++) {
+                    addTimeRow('daily-table', `${i}:00 - ${i+1}:00`);
+                }
+            }
+            
+            if (!document.getElementById('full-schedule-table').rows.length) {
+                for (let i = 0; i <= 23; i++) {
+                    addTimeRow('full-schedule-table', `${i}:00 - ${i+1}:00`);
+                }
+            }
+                        // المهام
+            if (!document.getElementById('daily-tasks-list').children.length) {
+                appData.defaultTasks.forEach(task => {
+                    addTask('daily-tasks-list', task);
+                });
+            }
+// الأذكار
+            if (!document.getElementById('adhkar-list').children.length) {
+                appData.defaultAdhkar.forEach(dhikr => {
+                    addDhikrItem(dhikr);
+                });
+            }
+            
+            // المهام الدورية
+            if (!document.getElementById('periodic-tasks-list').children.length) {
+                appData.defaultPeriodicTasks.forEach(task => {
+                    addTask('periodic-tasks-list', task);
+                });
+            }
+            
+            // نقاط التحسين
+            if (!document.getElementById('improvements-list').children.length) {
+                appData.defaultImprovements.forEach(improvement => {
+                    addImprovement(improvement);
+                });
+            }
+        }
+        
+        function renderPrayers() {
+            const container = document.getElementById('prayers-container');
+            container.innerHTML = '';
+            
+            appData.prayers.forEach(prayer => {
+                const prayerElement = document.createElement('div');
+                prayerElement.className = `prayer-item will-change ${prayer.status}`;
+                prayerElement.id = prayer.id;
+                
+                prayerElement.innerHTML = `
+                    <div class="prayer-name">${prayer.name}</div>
+                    <div class="prayer-time" onclick="editPrayerTime('${prayer.id}')">${prayer.time}</div>
+                    <div class="control-buttons">
+                        <button class="control-btn done-btn" onclick="markPrayer('${prayer.id}', 'done')">
+                            <i class="fas fa-check"></i>
+                        </button>
+                        <button class="control-btn pending-btn" onclick="markPrayer('${prayer.id}', 'pending')">
+                            <i class="fas fa-pause"></i>
+                        </button>
+                        <button class="control-btn not-done-btn" onclick="markPrayer('${prayer.id}', 'not-done')">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <button class="control-btn edit-btn" onclick="editPrayer('${prayer.id}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </div>
+                `;
+                
+                container.appendChild(prayerElement);
+            });
+        }
+        
+        // وظائف الصلوات
+        function markPrayer(prayerId, status) {
+            const prayer = appData.prayers.find(p => p.id === prayerId);
+            if (prayer) {
+                prayer.status = status;
+                const element = document.getElementById(prayerId);
+                if (element) {
+                    element.className = `prayer-item will-change ${status}`;
+                }
+                saveData();
+            }
+        }
+        
+        function editPrayer(prayerId) {
+            const prayer = appData.prayers.find(p => p.id === prayerId);
+            if (prayer) {
+                const newName = prompt('عدل اسم الصلاة:', prayer.name);
+                if (newName !== null && newName.trim() !== '') {
+                    prayer.name = newName;
+                    renderPrayers();
+                    saveData();
+                }
+            }
+        }
+        
+        function editPrayerTime(prayerId) {
+            const prayer = appData.prayers.find(p => p.id === prayerId);
+            if (prayer) {
+                const newTime = prompt('عدل وقت الصلاة:', prayer.time);
+                if (newTime !== null) {
+                    prayer.time = newTime;
+                    const timeElement = document.querySelector(`#${prayerId} .prayer-time`);
+                    if (timeElement) {
+                        timeElement.textContent = newTime;
+                    }
+                    saveData();
+                }
+            }
+        }
+        
+        function addCustomPrayer() {
+            const prayerName = prompt('أدخل اسم الصلاة الجديدة:');
+            if (prayerName && prayerName.trim() !== '') {
+                const prayerTime = prompt('أدخل وقت الصلاة:');
+                const newPrayer = {
+                    id: 'prayer-' + Date.now(),
+                    name: prayerName,
+                    time: prayerTime || '--:--',
+                    status: 'pending'
+                };
+                
+                appData.prayers.push(newPrayer);
+                renderPrayers();
+                saveData();
+            }
+        }
+        
+        // وظائف الطباعة كصورة
+        function printAsImage(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                html2canvas(section).then(canvas => {
+                    const link = document.createElement('a');
+                    link.download = `منتظم-${sectionId}-${new Date().toLocaleDateString('ar-EG')}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                });
+            }
+        }
+        
+        function printActiveTabAsImage() {
+            const activeTab = document.querySelector('.tab-content.active');
+            if (activeTab) {
+                html2canvas(activeTab).then(canvas => {
+                    const link = document.createElement('a');
+                    link.download = `منتظم-${appData.currentTab}-${new Date().toLocaleDateString('ar-EG')}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                });
+            }
+        }
+        
+        // وظائف إدارة الأقسام
+        function toggleManagerMenu() {
+            document.getElementById('manager-menu').classList.toggle('show');
+        }
+        
+        function addCustomSection(type) {
+            let sectionName = '';
+            let sectionHtml = '';
+            const sectionId = 'section-' + Date.now();
+            
+            switch(type) {
+                case 'daily':
+                    sectionName = prompt('أدخل اسم قسم الجدول اليومي:', 'جدول يومي جديد');
+                    sectionHtml = createTableSection(sectionId, sectionName);
+                    break;
+                    
+                case 'prayers':
+                    sectionName = prompt('أدخل اسم قسم الصلوات:', 'صلوات جديدة');
+                    sectionHtml = createPrayersSection(sectionId, sectionName);
+                    break;
+                    
+                case 'tasks':
+                    sectionName = prompt('أدخل اسم قسم المهام:', 'مهام جديدة');
+                    sectionHtml = createTasksSection(sectionId, sectionName);
+                    break;
+                    
+                case 'notes':
+                    sectionName = prompt('أدخل اسم قسم الملاحظات:', 'ملاحظات جديدة');
+                    sectionHtml = createNotesSection(sectionId, sectionName);
+                    break;
+                    
+                case 'custom':
+                    sectionName = prompt('أدخل اسم القسم المخصص:', 'قسم جديد');
+                    const sectionType = prompt('اختر نوع المحتوى:\n1- جدول\n2- قائمة\n3- نص حر');
+                    if (sectionType === '1') {
+                        sectionHtml = createTableSection(sectionId, sectionName);
+                    } else if (sectionType === '2') {
+                        sectionHtml = createTasksSection(sectionId, sectionName);
+                    } else {
+                        sectionHtml = createNotesSection(sectionId, sectionName);
+                    }
+                    break;
+            }
+            
+            if (sectionName && sectionName.trim() !== '') {
+                const activeTab = document.querySelector('.tab-content.active');
+                if (activeTab) {
+                    const plannerContent = activeTab.querySelector('.planner-content') || activeTab;
+                    plannerContent.insertAdjacentHTML('beforeend', sectionHtml);
+                    
+                    const newSection = document.getElementById(sectionId);
+                    newSection.style.animation = 'fadeIn 0.5s ease';
+                    
+                    // إضافة محتوى افتراضي إذا لزم الأمر
+                    if (type === 'daily' || (type === 'custom' && sectionType === '1')) {
+                        addTimeRow(`${sectionId}-table`, '00:00 - 00:00');
+                    } else if (type === 'tasks' || (type === 'custom' && sectionType === '2')) {
+                        addTask(`${sectionId}-list`, 'مهمة جديدة');
+                    }
+                    
+                    saveData();
+                }
+            }
+            
+            toggleManagerMenu();
+        }
+        
+        function createTableSection(id, title) {
+            return `
+                <div class="section" id="${id}">
+                    <h2 class="section-title">
+                        ${title || 'جدول جديد'}
+                        <div class="section-actions">
+                            <button class="section-btn print" onclick="printAsImage('${id}')">
+                                <i class="fas fa-print"></i>
+                            </button>
+                            <button class="section-btn add" onclick="addCustomTimeRow('${id}-table')">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <button class="section-btn delete" onclick="showConfirmation('هل تريد حذف هذا القسم؟', () => removeSection('${id}'))">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </h2>
+                    <table class="time-table" id="${id}-table">
+                    </table>
+                </div>
+            `;
+        }
+        
+        function createPrayersSection(id, title) {
+            return `
+                <div class="section" id="${id}">
+                    <h2 class="section-title">
+                        <i class="fas fa-pray"></i> ${title || 'صلوات جديدة'}
+                        <div class="section-actions">
+                            <button class="section-btn print" onclick="printAsImage('${id}')">
+                                <i class="fas fa-print"></i>
+                            </button>
+                            <button class="section-btn add" onclick="addCustomPrayer()">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <button class="section-btn delete" onclick="showConfirmation('هل تريد حذف هذا القسم؟', () => removeSection('${id}'))">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </h2>
+                    <div class="prayer-grid" id="${id}-prayers">
+                        <div class="prayer-item pending">
+                            <div class="prayer-name">صلاة جديدة</div>
+                            <div class="prayer-time" onclick="editPrayerTime('${id}-prayer')">--:--</div>
+                            <div class="control-buttons">
+                                <button class="control-btn done-btn" onclick="markPrayer('${id}-prayer', 'done')">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                                <button class="control-btn pending-btn" onclick="markPrayer('${id}-prayer', 'pending')">
+                                    <i class="fas fa-pause"></i>
+                                </button>
+                                <button class="control-btn not-done-btn" onclick="markPrayer('${id}-prayer', 'not-done')">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                                <button class="control-btn edit-btn" onclick="editPrayer('${id}-prayer')">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function createTasksSection(id, title) {
+            return `
+                <div class="section" id="${id}">
+                    <h2 class="section-title">
+                        <i class="fas fa-tasks"></i> ${title || 'مهام جديدة'}
+                        <div class="section-actions">
+                            <button class="section-btn print" onclick="printAsImage('${id}')">
+                                <i class="fas fa-print"></i>
+                            </button>
+                            <button class="section-btn add" onclick="addTask('${id}-list')">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <button class="section-btn delete" onclick="showConfirmation('هل تريد حذف هذا القسم؟', () => removeSection('${id}'))">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </h2>
+                    <ul class="daily-checklist" id="${id}-list">
+                        <li>
+                            <span contenteditable="true">مهمة جديدة</span>
+                            <div class="control-buttons">
+                                <button class="control-btn done-btn" onclick="markTaskDone(this)">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                                <button class="control-btn pending-btn" onclick="markTaskPending(this)">
+                                    <i class="fas fa-pause"></i>
+                                </button>
+                                <button class="control-btn not-done-btn" onclick="markTaskNotDone(this)">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                                <button class="control-btn edit-btn" onclick="editTask(this)">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            `;
+        }
+        
+        function createNotesSection(id, title) {
+            return `
+                <div class="section notes-section" id="${id}">
+                    <h2 class="section-title">
+                        <i class="fas fa-sticky-note"></i> ${title || 'ملاحظات جديدة'}
+                        <div class="section-actions">
+                            <button class="section-btn print" onclick="printAsImage('${id}')">
+                                <i class="fas fa-print"></i>
+                            </button>
+                            <button class="section-btn delete" onclick="showConfirmation('هل تريد حذف هذا القسم؟', () => removeSection('${id}'))">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </h2>
+                    <textarea class="notes-area" placeholder="اكتب هنا ملاحظاتك..."></textarea>
+                </div>
+            `;
+        }
+        
+        function removeSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.style.animation = 'fadeOut 0.5s ease';
+                setTimeout(() => {
+                    section.remove();
+                    saveData();
+                }, 500);
+            }
+            hideConfirmation();
+        }
+        
+        // وظائف إضافة المحتوى
+        function addTimeRow(tableId, timeRange) {
+            const table = document.getElementById(tableId);
+            if (table) {
+                const row = table.insertRow();
+                row.className = 'will-change';
+                row.innerHTML = `
+                    <td>
+                        <input type="text" class="time-input" value="${timeRange || '00:00 - 00:00'}" 
+                               onchange="saveData()" placeholder="00:00 - 00:00">
+                    </td>
+                    <td contenteditable="true" onfocusout="saveData()">__________________</td>
+                    <td>
+                        <select class="status-select" onchange="saveData()">
+                            <option value="">--</option>
+                            <option value="done">تم</option>
+                            <option value="pending">قيد التنفيذ</option>
+                            <option value="not-done">لم يتم</option>
+                        </select>
+                    </td>
+                `;
+                saveData();
+            }
+        }
+        
+        function addCustomTimeRow(tableId) {
+            const customTime = prompt('أدخل الفترة الزمنية (مثال: 08:00 - 09:00):');
+            if (customTime && customTime.trim() !== '') {
+                addTimeRow(tableId, customTime);
+            }
+        }
+        
+        function addTask(listId, taskText) {
+            const list = document.getElementById(listId);
+            if (list) {
+                const li = document.createElement('li');
+                li.className = 'will-change';
+                li.innerHTML = `
+                    <span contenteditable="true" onfocusout="saveData()">${taskText || 'مهمة جديدة'}</span>
+                    <div class="control-buttons">
+                        <button class="control-btn done-btn" onclick="markTaskDone(this)">
+                            <i class="fas fa-check"></i>
+                        </button>
+                        <button class="control-btn pending-btn" onclick="markTaskPending(this)">
+                            <i class="fas fa-pause"></i>
+                        </button>
+                        <button class="control-btn not-done-btn" onclick="markTaskNotDone(this)">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <button class="control-btn edit-btn" onclick="editTask(this)">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </div>
+                `;
+                list.appendChild(li);
+                saveData();
+            }
+        }
+        
+        function addDhikrItem(text) {
+            const list = document.getElementById('adhkar-list');
+            if (list) {
+                const li = document.createElement('li');
+                li.className = 'will-change';
+                li.innerHTML = `
+                    <span contenteditable="true" onfocusout="saveData()">${text || 'ذكر جديد'}</span>
+                    <div class="control-buttons">
+                        <button class="control-btn done-btn" onclick="markTaskDone(this)">
+                            <i class="fas fa-check"></i>
+                        </button>
+                        <button class="control-btn pending-btn" onclick="markTaskPending(this)">
+                            <i class="fas fa-pause"></i>
+                        </button>
+                        <button class="control-btn not-done-btn" onclick="markTaskNotDone(this)">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+                list.appendChild(li);
+                saveData();
+            }
+        }
+        
+        function addImprovement(text) {
+            const list = document.getElementById('improvements-list');
+            if (list) {
+                const li = document.createElement('li');
+                li.className = 'will-change';
+                li.innerHTML = `
+                    <span contenteditable="true" onfocusout="saveData()">${text || 'نقطة تحسين جديدة'}</span>
+                    <div class="control-buttons">
+                        <button class="control-btn edit-btn" onclick="editTask(this)">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </div>
+                `;
+                list.appendChild(li);
+                saveData();
+            }
+        }
+        
+        // وظائف المهام
+        function markTaskDone(button) {
+            const taskItem = button.closest('li');
+            taskItem.classList.remove('pending', 'not-done');
+            taskItem.classList.add('done');
+            saveData();
+            
+            // تأثير مرئي
+            button.innerHTML = '<i class="fas fa-check-double"></i>';
+            setTimeout(() => {
+                button.innerHTML = '<i class="fas fa-check"></i>';
+            }, 500);
+        }
+        
+        function markTaskPending(button) {
+            const taskItem = button.closest('li');
+            taskItem.classList.remove('done', 'not-done');
+            taskItem.classList.add('pending');
+            saveData();
+        }
+        
+        function markTaskNotDone(button) {
+            const taskItem = button.closest('li');
+            taskItem.classList.remove('done', 'pending');
+            taskItem.classList.add('not-done');
+            saveData();
+        }
+        
+        function editTask(button) {
+            const taskText = button.closest('li').querySelector('span');
+            const newText = prompt('عدل المهمة:', taskText.textContent);
+            if (newText !== null && newText.trim() !== '') {
+                taskText.textContent = newText;
+                saveData();
+                
+                // تأثير مرئي
+                button.innerHTML = '<i class="fas fa-check"></i>';
+                setTimeout(() => {
+                    button.innerHTML = '<i class="fas fa-edit"></i>';
+                }, 1000);
+            }
+        }
+        
+        // وظائف التبويبات
+        function openTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+            appData.currentTab = tabId;
+            saveData();
+        }
+        
+        // تقييم اليوم
+        function rateDay(rating) {
+            appData.dayRating = rating;
+            highlightStars(rating);
+            saveData();
+        }
+        
+        function highlightStars(rating) {
+            const stars = document.querySelectorAll('.star');
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+        }
+        
+        // تحرير التاريخ
+        function editDay() {
+            const days = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+            const currentDay = document.getElementById('current-day');
+            const newDay = prompt('أدخل اليوم:', currentDay.textContent);
+            
+            if (newDay !== null && newDay.trim() !== '') {
+                currentDay.textContent = newDay;
+                localStorage.setItem('currentDay', newDay);
+            }
+        }
+        
+        function editDate() {
+            const currentDate = document.getElementById('current-date');
+            const newDate = prompt('أدخل التاريخ:', currentDate.textContent);
+            
+            if (newDate !== null && newDate.trim() !== '') {
+                currentDate.textContent = newDate;
+                localStorage.setItem('currentDate', newDate);
+            }
+        }
+        
+        // نافذة التأكيد
+        function showConfirmation(message, callback) {
+            document.getElementById('confirmation-message').textContent = message;
+            document.getElementById('confirmation-modal').classList.add('show');
+            appData.confirmationCallback = callback;
+        }
+        
+        function hideConfirmation() {
+            document.getElementById('confirmation-modal').classList.remove('show');
+            appData.confirmationCallback = null;
+        }
+        
+        function confirmAction() {
+            if (appData.confirmationCallback) {
+                appData.confirmationCallback();
+            }
+            hideConfirmation();
+        }
+        
+        // إعداد مستمعي الأحداث
+        function setupEventListeners() {
+            // حفظ المحتوى القابل للتعديل
+            document.addEventListener('focusout', function(e) {
+                if (e.target.hasAttribute('contenteditable')) {
+                    saveData();
+                }
+            });
+            
+            // حفظ التغييرات في العناصر
+            document.addEventListener('change', function(e) {
+                if (e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                    saveData();
+                }
+            });
+            
+            // إغلاق قائمة الإدارة عند النقر خارجها
+            document.addEventListener('click', function(e) {
+                const managerMenu = document.getElementById('manager-menu');
+                const managerBtn = document.querySelector('.manager-btn');
+                
+                if (managerMenu.classList.contains('show') && 
+                    !e.target.closest('.manager-menu') && 
+                    !e.target.closest('.manager-btn')) {
+                    managerMenu.classList.remove('show');
+                }
+            });
+        }
+        
+        // بدء التطبيق
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
